@@ -39,11 +39,68 @@ ____________________________________
 01:25:01 Coding for Consuming Message in EndUser services
 01:31:12 Testing App with 200K messages live.
 
-Thanks for watching
-Please subscribe for more such vidoes
+
+
+Delete Both Kafka and Zookeeper Data Directories
+
+Besides clearing kafka-logs, you need to clear Zookeeper's data directory to fully reset the cluster metadata.
+
+Delete Kafka Logs:
+-----------------------------------------------------------------------------------------
+del /s /q \tmp\kafka-logs
+-----------------------------------------------------------------------------------------
+
+Delete Zookeeper Data: By default, Zookeeper stores its data in the \tmp\zookeeper directory. Delete it as well:
+------------------------------------------------------------------------------------------
+del /s /q \tmp\zookeeper
+------------------------------------------------------------------------------------------
+
+************************************************************************************************
+Enable Topic Deletion (if not already enabled):
+delete.topic.enable=true
+
+Delete the Topic:
+bin\windows\kafka-topics.bat --delete --topic user-topic --bootstrap-server localhost:9092
+
+Verify the Deletion:
+bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
+
+***********************************************************************************************
+Deleting Messages Without Deleting the Topic
+1.Set Retention Time to 0 (Deletes Messages Immediately):
+--------------------------------------------------------------------------------------------------------------------
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 --entity-type topics --entity-name user-topic --alter --add-config retention.ms=0
+---------------------------------------------------------------------------------------------------------------------
+
+2.Wait for a Few Seconds and then reset the retention time to avoid deleting new messages:
+--------------------------------------------------------------------------------------------------------------------
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 --entity-type topics --entity-name user-topic --alter --add-config retention.ms=604800000
+--------------------------------------------------------------------------------------------------------------------
+
+Command to Retain Messages Forever:
+-------------------------------------------------------------------------------------------------------------------
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 --entity-type topics --entity-name user-topic --alter --add-config retention.ms=-1
+-------------------------------------------------------------------------------------------------------------------
+
+Verify the Configuration:
+----------------------------------------------------------------------------------------------------------------
+bin\windows\kafka-configs.bat --bootstrap-server localhost:9092 --entity-type topics --entity-name user-topic --describe
+----------------------------------------------------------------------------------------------------------------
+You should see:
+--------------------------------------------------
+Configs for topic 'user-topic' are retention.ms=-1
+---------------------------------------------------
+
+3.Verify Message Deletion:
+-----------------------------------------------------------------------------------------------------------------
+bin\windows\kafka-console-consumer.bat --topic user-topic --from-beginning --bootstrap-server localhost:9092
+-----------------------------------------------------------------------------------------------------------------
+
+
 
  
 
-
+C:\tmp\kafka-logs
+C:\tmp\zookeeper
 
 
